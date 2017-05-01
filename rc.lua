@@ -54,11 +54,11 @@ end
 local chosen_theme = "vertex"
 local modkey       = "Mod4"
 local altkey       = "Mod1"
-local browser      = "qutebrowser"
+local browser      = "firefox"
 local terminal = "termite"
 local editor = os.getenv("EDITOR") or "emacs"
 local editor_cmd = terminal .. " -e " .. editor
-local fm = "thunar"
+local fm = "nautilus"
 local gui_editor = "emacsclient -nc --socket-name /tmp/emacs1000/server"
 
 awful.util.terminal = terminal
@@ -156,12 +156,12 @@ awful.util.mymainmenu = freedesktop.menu.build({
     icon_size = beautiful.menu_height or 16,
     before = {
         { "Awesome", myawesomemenu, beautiful.awesome_icon },
-        -- other triads can be put here
+       -- other triads can be put here
     },
-    after = {
-        { "Open terminal", terminal },
-        -- other triads can be put here
-    }
+   after = {
+       { "Open terminal", terminal },
+       -- other triads can be put here
+   }
 })
 --menubar.utils.terminal = terminal -- Set the Menubar terminal for applications that require it
 -- }}}
@@ -358,13 +358,13 @@ globalkeys = awful.util.table.join(
               {description = "lua execute prompt", group = "awesome"}),
     -- Menubar
     awful.key({ modkey }, "p",function() awful.util.spawn("rofi -show run"  ) end,
-              {description = "show rofi", group = "launcher"}),
+             {description = "show rofi", group = "launcher"}),
 
     awful.key({ modkey }, "q",function() awful.util.spawn("qutebrowser --backend webengine"  ) end,
       {description = "qutebrowser", group = "launcher"}),
 
-    awful.key({ modkey }, "d",function() awful.util.spawn("thunar"  ) end,
-      {description = "thunar", group = "launcher"}),
+    awful.key({ modkey }, "d",function() awful.util.spawn("nautilus --new-window "  ) end,
+      {description = "nautilus", group = "launcher"}),
 
     awful.key({ modkey }, "t",function() awful.util.spawn("transmission-gtk"  ) end,
       {description = "transmission", group = "launcher"}),
@@ -506,21 +506,25 @@ awful.rules.rules = {
       properties = { titlebars_enabled = false } },
 
     -- Set Firefox to always map on the first tag on screen 1.
-    { rule = { class = "Firefox" },
-      properties = { screen = 1, tag = screen[1].tags[1] } },
 
     { rule = { class = "Cerebro" },
       properties = { floating = true,
                      ontop = true,
-      }
+      },
+      callback = function(c)
+          c:geometry({width = 900 , height = 45 })
+          awful.placement.top(c,{margins = {top = 300}})
+      end
     },
 
     { rule = { class = "mpv" },
-      properties = { floating = true,
-                     sticky = true,
-                     ontop = true,
-      }
+      properties = { floating = true, },
+      callback = function(c)
+          awful.placement.centered(c,nil)
+          c.border_width = 0
+      end
     },
+
 
     { rule = { class = "Gimp", role = "gimp-image-window" },
           properties = { maximized = true } },
@@ -600,6 +604,8 @@ client.connect_signal("mouse::enter", function(c)
 end)
 
 -- No border for maximized clients
+
+--[[
 client.connect_signal("focus",
     function(c)
         if c.maximized then -- no borders if only 1 client visible
@@ -610,6 +616,15 @@ client.connect_signal("focus",
         end
     end)
 client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+--]]
+client.connect_signal("property::maximized", function(c) 
+    c.border_width = c.maximized and 0 or beautiful.border_width
+end)
+
+client.connect_signal("property::fullscreen", function(c) 
+                        c.border_width = c.fullscreen and 0 or beautiful.border_width
+end)
+--
 -- }}}
 
 -- Autostart user applications
@@ -632,14 +647,15 @@ end
 --  run_once("mpd")
   run_once("pasystray")
   run_once("parcellite")
-  run_once("dropbox")
+  -- run_once("dropbox")
   run_once("caffeine")
   run_once("xset -b")
   run_once("unclutter -idle 4")
   run_once("transmission-gtk -m -p 9095")
   run_once("nitrogen --restore")
 --  run_once("start_conky.sh")
-  run_once("source ~.profile")
+--  run_once("source ~/.profile")
   run_once("indicator-kdeconnect")
-  run_once("synergys -c ~/.config/Synergy/syn.conf -f --name archlinux")
+--  run_once("synergys -c ~/.config/Synergy/syn.conf -f --name archlinux")
+  --run_once("cerebro")
 -- run_once("cavalcade")

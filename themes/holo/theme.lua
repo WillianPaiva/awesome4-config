@@ -14,9 +14,19 @@ local string = string
 local os     = { getenv = os.getenv }
 
 local theme                                     = {}
+
+--Minitray
+theme.widget = {}
+
+theme.widget.margin = {
+	tray        = { 2, 2, 2, 2 },
+}
+
+
 theme.default_dir                               = require("awful.util").get_themes_dir() .. "default"
-theme.icon_dir                                  = os.getenv("HOME") .. "/.config/awesome/themes/holo/icons"
-theme.wallpaper                                 = os.getenv("HOME") .. "/.config/awesome/themes/holo/wall.png"
+theme.icon_dir                                  = os.getenv("HOME") .. "/.config/awesome/themes/vertex/icons"
+theme.wallpaper                                 = os.getenv("HOME") .. "/.config/awesome/themes/vertex/wall.png"
+
 theme.font                                      = "Roboto Bold 10"
 theme.taglist_font                              = "Roboto Condensed Regular 8"
 theme.fg_normal                                 = "#FFFFFF"
@@ -94,6 +104,10 @@ theme.titlebar_maximized_button_normal_active   = theme.default_dir.."/titlebar/
 theme.titlebar_maximized_button_focus_active    = theme.default_dir.."/titlebar/maximized_focus_active.png"
 
 theme.musicplr = string.format("%s -e ncmpcpp", awful.util.terminal)
+
+
+-- http://fontawesome.io/cheatsheet
+awful.util.tagnames = { " ", " ", " ", " ", " ", " ", " ", " ", " " }
 
 local markup = lain.util.markup
 local blue   = "#80CCE6"
@@ -180,23 +194,23 @@ function () awful.spawn(theme.musicplr) end)))
 prev_icon:buttons(awful.util.table.join(awful.button({}, 1,
 function ()
     awful.spawn.with_shell("mpc prev")
-    mpd.update()
+    theme.mpd.update()
 end)))
 next_icon:buttons(awful.util.table.join(awful.button({}, 1,
 function ()
     awful.spawn.with_shell("mpc next")
-    mpd.update()
+    theme.mpd.update()
 end)))
 stop_icon:buttons(awful.util.table.join(awful.button({}, 1,
 function ()
     play_pause_icon:set_image(theme.play)
     awful.spawn.with_shell("mpc stop")
-    mpd.update()
+    theme.mpd.update()
 end)))
 play_pause_icon:buttons(awful.util.table.join(awful.button({}, 1,
 function ()
     awful.spawn.with_shell("mpc toggle")
-    mpd.update()
+    theme.mpd.update()
 end)))
 
 -- Battery
@@ -290,10 +304,11 @@ function theme.at_screen_connect(s)
     s.quake = lain.util.quake({ app = awful.util.terminal })
 
     -- If wallpaper is a function, call it with the screen
+    local wallpaper = theme.wallpaper
     if type(wallpaper) == "function" then
-        theme.wallpaper = theme.wallpaper(s)
+        wallpaper = wallpaper(s)
     end
-    gears.wallpaper.maximized(theme.wallpaper, s, true)
+    gears.wallpaper.maximized(wallpaper, s, true)
 
     -- Tags
     awful.tag(awful.util.tagnames, s, awful.layout.layouts)

@@ -30,7 +30,7 @@ theme.default_dir                               = require("awful.util").get_them
 theme.icon_dir                                  = os.getenv("HOME") .. "/.config/awesome/themes/vertex/icons"
 theme.wallpaper                                 = os.getenv("HOME") .. "/.config/awesome/themes/vertex/wall.png"
 theme.font                                      = "Roboto Bold 10"
-theme.taglist_font                              = "FontAwesome 10"
+theme.taglist_font                              = "FontAwesome 17"
 theme.fg_normal                                 = "#FFFFFF"
 theme.fg_focus                                  = "#6A95EB"
 theme.bg_focus                                  = "#303030"
@@ -122,7 +122,7 @@ theme.cpu    = theme.default_dir.."/titlebar/maximized_focus_active.png"
 
 
 -- http://fontawesome.io/cheatsheet
-awful.util.tagnames = { "1: ", "2: ", "3: ", "4: ", "5: ", "6: ", "7: ", "8: ", "9: " }
+awful.util.tagnames = { " ", " ", " ", " ", " ", " ", " ", " ", " " }
 
 local markup = lain.util.markup
 
@@ -135,7 +135,7 @@ lain.widget.calendar({
     notification_preset = {
         fg = "#FFFFFF",
         bg = theme.bg_normal,
-        position = "top_right",
+        position = "top_middle",
         font = "Monospace 10"
     }
 })
@@ -279,45 +279,45 @@ volicon:buttons(awful.util.table.join (
           end)
 ))
 
--- -- Wifi carrier and signal strength
--- local wificon = wibox.widget.imagebox()
--- local wifitooltip = awful.tooltip({
---     objects = { wificon },
---     margin_leftright = 15,
---     margin_topbottom = 15
--- })
--- wifitooltip.wibox.fg = theme.fg_normal
--- wifitooltip.textbox.font = theme.font
--- wifitooltip.timeout = 0
--- wifitooltip:set_shape(function(cr, width, height)
---     gears.shape.infobubble(cr, width, height, corner_radius, arrow_size, width - 140)
--- end)
--- local mywifisig = lain.widget.watch({
---     cmd = { awful.util.shell, "-c", "awk 'NR==3 {printf(\"%d-%.0f\\n\",$2, $3*10/7)}' /proc/net/wireless; iw dev wlp3s0 link" },
---     settings = function()
---         local carrier, perc = output:match("(%d)-(%d+)")
---         local tiptext = output:gsub("(%d)-(%d+)", ""):gsub("%s+$", "")
---         if carrier == nil and perc == nil and tiptext == "Not connected." then
---             wificon:set_image(theme.wifidisc)
---             wifitooltip:set_markup("No carrier")
---         else
---             perc = tonumber(perc)
---             if perc <= 5 then
---                 wificon:set_image(theme.wifinone)
---             elseif perc <= 25 then
---                 wificon:set_image(theme.wifilow)
---             elseif perc <= 50 then
---                 wificon:set_image(theme.wifimed)
---             elseif perc <= 75 then
---                 wificon:set_image(theme.wifihigh)
---             else
---                 wificon:set_image(theme.wififull)
---             end
---             wifitooltip:set_markup(tiptext)
---         end
---     end
--- })
--- wificon:connect_signal("button::press", function() awful.spawn(string.format("%s -e wavemon", awful.util.terminal)) end)
+-- Wifi carrier and signal strength
+local wificon = wibox.widget.imagebox()
+local wifitooltip = awful.tooltip({
+    objects = { wificon },
+    margin_leftright = 15,
+    margin_topbottom = 15
+})
+wifitooltip.wibox.fg = theme.fg_normal
+wifitooltip.textbox.font = theme.font
+wifitooltip.timeout = 0
+wifitooltip:set_shape(function(cr, width, height)
+    gears.shape.infobubble(cr, width, height, corner_radius, arrow_size, width - 140)
+end)
+local mywifisig = lain.widget.watch({
+    cmd = { awful.util.shell, "-c", "awk 'NR==3 {printf(\"%d-%.0f\\n\",$2, $3*10/7)}' /proc/net/wireless; iw dev wlp3s0 link" },
+    settings = function()
+        local carrier, perc = output:match("(%d)-(%d+)")
+        local tiptext = output:gsub("(%d)-(%d+)", ""):gsub("%s+$", "")
+        if carrier == nil and perc == nil and tiptext == "Not connected." then
+            wificon:set_image(theme.wifidisc)
+            wifitooltip:set_markup("No carrier")
+        else
+            perc = tonumber(perc)
+            if perc <= 5 then
+                wificon:set_image(theme.wifinone)
+            elseif perc <= 25 then
+                wificon:set_image(theme.wifilow)
+            elseif perc <= 50 then
+                wificon:set_image(theme.wifimed)
+            elseif perc <= 75 then
+                wificon:set_image(theme.wifihigh)
+            else
+                wificon:set_image(theme.wififull)
+            end
+            wifitooltip:set_markup(tiptext)
+        end
+    end
+})
+wificon:connect_signal("button::press", function() awful.spawn(string.format("%s -e wavemon", awful.util.terminal)) end)
 
 -- Weather
 theme.weather = lain.widget.weather({
@@ -415,9 +415,7 @@ function theme.at_screen_connect(s)
         layout = wibox.layout.align.horizontal,
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
-            wibox.container.margin(mylauncher, 4, 4, 4, 4),
-            s.layoutb,
-            rspace0,
+            tspace1,
             CPUwidget,
             rspace0,
             memorywidget,
@@ -425,46 +423,51 @@ function theme.at_screen_connect(s)
             s.mypromptbox,
         },
         { -- Middle widgets
-            layout = wibox.layout.fixed.horizontal,
-            wibox.container.constraint(theme.mpd.widget, "exact", 450),
-            s.mytaglist,
+            layout = wibox.layout.flex.horizontal,
+            rspace0,
+            rspace0,
+            rspace0,
+            space,
+            mytextclock,
         },
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
-            mytextclock,
-            rspace0,
+            wibox.container.constraint(wibox.widget { nil, nil, theme.mpd.widget, layout = wibox.layout.align.horizontal }, "exact", s.workarea.width/3),
             theme.weather.icon,
             theme.weather.widget,
+            rspace1,
+            wificon,
             rspace0,
             volicon,
-            rspace0,
+            rspace2,
             baticon,
-            rspace0,
+            rspace3,
             tray.layout,
             -- wibox.widget.systray(),
         },
     }
 
+    -- Create the vertical wibox
     -- local dockheight = (40 *  s.workarea.height)/100
-    -- local dockshape = function(cr, width, height)
-    --   gears.shape.partially_rounded_rect(cr,  width, height, true, true, false, false, 6)
-    -- end
+    local dockshape = function(cr, width, height)
+      gears.shape.partially_rounded_rect(cr,  width, height, true, true, false, false, 6)
+    end
     -- s.myleftwibox = wibox({ screen = s, x=0, y=s.workarea.height/2 - dockheight/2, width = 6, height = dockheight, fg = theme.fg_normal, bg = barcolor2, ontop = true, visible = true, type = "dock" })
 
-    -- s.mybottomwibox = awful.wibar({ position = "bottom", screen = s, height = 35,width =530, bg = gears.color.create_png_pattern(theme.panelbg) })
-    -- gears.surface.apply_shape_bounding(s.mybottomwibox, dockshape)
-
+    s.mybottomwibox = awful.wibar({ position = "bottom", screen = s, height = 35,width =530, bg = gears.color.create_png_pattern(theme.panelbg) })
+    gears.surface.apply_shape_bounding(s.mybottomwibox, dockshape)
     -- Add widgets to the vertical wibox
-    -- s.mybottomwibox:setup {
-    --   layout = wibox.layout.align.horizontal,
-    --     {
-    --       layout = wibox.layout.fixed.horizontal,
-    --         rspace1,
-    --         rspace1,
-    --         s.layoutb,
-    --         wibox.container.margin(mylauncher, 4, 4, 4, 4),
-    --     },
-    -- }
+    s.mybottomwibox:setup {
+      layout = wibox.layout.align.horizontal,
+        {
+          layout = wibox.layout.fixed.horizontal,
+            rspace1,
+            s.mytaglist,
+            rspace1,
+            s.layoutb,
+            wibox.container.margin(mylauncher, 4, 4, 4, 4),
+        },
+    }
 
     -- Add toggling functionalities
     -- s.docktimer = gears.timer{ timeout = 2 }
